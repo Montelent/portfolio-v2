@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const MIN_LOADER_MS = 1500;
+const MAX_LOADER_MS = 3000; // Hard ceiling — never hang longer than this
 
 // Persists across navigations — loader only shows on first visit
 let loaderShown = false;
@@ -21,16 +22,23 @@ export const PortfolioPage = () => {
     const location = useLocation();
 
     const [minTimeElapsed, setMinTimeElapsed] = useState(loaderShown);
+    const [maxTimeElapsed, setMaxTimeElapsed] = useState(loaderShown);
     useEffect(() => {
         if (loaderShown) return;
-        const t = setTimeout(() => {
+        const minT = setTimeout(() => setMinTimeElapsed(true), MIN_LOADER_MS);
+        const maxT = setTimeout(() => {
             loaderShown = true;
-            setMinTimeElapsed(true);
-        }, MIN_LOADER_MS);
-        return () => clearTimeout(t);
+            setMaxTimeElapsed(true);
+        }, MAX_LOADER_MS);
+        return () => { clearTimeout(minT); clearTimeout(maxT); };
     }, []);
 
-    const isLoaded = configLoaded && projectsLoaded && minTimeElapsed;
+    const isLoaded = (configLoaded && projectsLoaded && minTimeElapsed) || maxTimeElapsed;
+
+    // Mark as shown so subsequent navigations skip the loader
+    useEffect(() => {
+        if (isLoaded) loaderShown = true;
+    }, [isLoaded]);
 
     useEffect(() => {
         if (isLoaded && location.hash) {
