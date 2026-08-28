@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const LINES = [
-    { text: 'phyominthein@macbook-pro ~ % init_workspace', delay: 0.1, type: 'cmd' },
+    { text: 'montel@montelent ~ % init_workspace', delay: 0.1, type: 'cmd' },
     { text: 'loading core layout modules...', delay: 0.3, type: 'info' },
     { text: 'fetching portfolio database [200 OK]', delay: 0.6, type: 'success' },
     { text: 'establishing secure handshake...', delay: 0.9, type: 'info' },
     { text: 'session authenticated. [root access granted]', delay: 1.2, type: 'success' },
-    { text: 'launching phyo.dev environment_v2.0...', delay: 1.5, type: 'highlight' }
+    { text: 'launching montelent.dev environment_v2.0...', delay: 1.5, type: 'highlight' }
 ];
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 }
 
 export function LoadingScreen({ name, minMs = 1500 }: Props) {
-    const displayName = name || 'Phyo Min Thein';
+    const displayName = name || 'Montel Anthony';
     const [blink, setBlink] = useState(true);
 
     useEffect(() => {
