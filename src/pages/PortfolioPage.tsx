@@ -12,9 +12,8 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const MIN_LOADER_MS = 1500;
-const MAX_LOADER_MS = 3000; // Hard ceiling — never hang longer than this
+const MAX_LOADER_MS = 3000;
 
-// Persists across navigations — loader only shows on first visit
 let loaderShown = false;
 
 export const PortfolioPage = () => {
@@ -35,10 +34,19 @@ export const PortfolioPage = () => {
 
     const isLoaded = (configLoaded && projectsLoaded && minTimeElapsed) || maxTimeElapsed;
 
-    // Mark as shown so subsequent navigations skip the loader
     useEffect(() => {
         if (isLoaded) loaderShown = true;
     }, [isLoaded]);
+
+    // Dynamic browser tab title from Admin settings
+    useEffect(() => {
+        if (!configLoaded) return;
+        const title =
+            siteConfig.pageTitle?.trim() ||
+            [siteConfig.name, siteConfig.heroTitle].filter(Boolean).join(' | ') ||
+            'Portfolio';
+        document.title = title;
+    }, [configLoaded, siteConfig.pageTitle, siteConfig.name, siteConfig.heroTitle]);
 
     useEffect(() => {
         if (isLoaded && location.hash) {
@@ -58,7 +66,13 @@ export const PortfolioPage = () => {
     return (
         <AnimatePresence mode="wait">
             {!isLoaded ? (
-                <LoadingScreen key="loader" name={siteConfig.name} minMs={MIN_LOADER_MS} />
+                <LoadingScreen
+                    key="loader"
+                    name={siteConfig.name}
+                    minMs={MIN_LOADER_MS}
+                    loaderHandle={siteConfig.loaderHandle}
+                    loaderEnv={siteConfig.loaderEnv}
+                />
             ) : (
                 <motion.div
                     key="content"

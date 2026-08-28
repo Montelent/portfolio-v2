@@ -1,22 +1,34 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const LINES = [
-    { text: 'montel@montelent ~ % init_workspace', delay: 0.1, type: 'cmd' },
-    { text: 'loading core layout modules...', delay: 0.3, type: 'info' },
-    { text: 'fetching portfolio database [200 OK]', delay: 0.6, type: 'success' },
-    { text: 'establishing secure handshake...', delay: 0.9, type: 'info' },
-    { text: 'session authenticated. [root access granted]', delay: 1.2, type: 'success' },
-    { text: 'launching montelent.dev environment_v2.0...', delay: 1.5, type: 'highlight' }
-];
-
 interface Props {
     name: string;
     minMs?: number;
+    /** Terminal prompt, e.g. "montel@montelent" */
+    loaderHandle?: string;
+    /** Environment name shown on the last line, e.g. "montelent.dev" */
+    loaderEnv?: string;
 }
 
-export function LoadingScreen({ name, minMs = 1500 }: Props) {
-    const displayName = name || 'Montel Anthony';
+export function LoadingScreen({
+    name,
+    minMs = 1500,
+    loaderHandle,
+    loaderEnv,
+}: Props) {
+    const displayName = name || 'Portfolio';
+    const handle = loaderHandle?.trim() || 'user@portfolio';
+    const env = loaderEnv?.trim() || 'portfolio';
+
+    const lines = [
+        { text: `${handle} ~ % init_workspace`, delay: 0.1, type: 'cmd' as const },
+        { text: 'loading core layout modules...', delay: 0.3, type: 'info' as const },
+        { text: 'fetching portfolio database [200 OK]', delay: 0.6, type: 'success' as const },
+        { text: 'establishing secure handshake...', delay: 0.9, type: 'info' as const },
+        { text: 'session authenticated. [root access granted]', delay: 1.2, type: 'success' as const },
+        { text: `launching ${env} environment_v2.0...`, delay: 1.5, type: 'highlight' as const },
+    ];
+
     const [blink, setBlink] = useState(true);
 
     useEffect(() => {
@@ -33,18 +45,15 @@ export function LoadingScreen({ name, minMs = 1500 }: Props) {
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a0a]"
             style={{
-                // Performant radial gradient instead of expensive CSS blur filters
                 backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, rgba(6, 182, 212, 0.03) 30%, transparent 60%)'
             }}
         >
-            {/* Terminal Window & Header Wrapper */}
             <motion.div
                 initial={{ scale: 0.95, opacity: 0, y: 15 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="w-[90%] sm:w-[85%] max-w-2xl relative z-10 flex flex-col items-center"
             >
-                {/* Header: Name and Title */}
                 <div className="mb-6 sm:mb-8 text-center flex flex-col items-center">
                     <motion.span
                         initial={{ opacity: 0 }}
@@ -73,7 +82,6 @@ export function LoadingScreen({ name, minMs = 1500 }: Props) {
                     </motion.span>
                 </div>
 
-                {/* macOS Window Chrome */}
                 <div className="bg-[#1a1a1a] w-full rounded-t-xl border border-[#333333] border-b-0 flex items-center px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
                     <div className="flex gap-2">
                         <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#ff5f56]" />
@@ -90,10 +98,9 @@ export function LoadingScreen({ name, minMs = 1500 }: Props) {
                     </div>
                 </div>
 
-                {/* Terminal Body */}
                 <div className="bg-[#0c0c0c] w-full border border-[#333333] rounded-b-xl p-4 sm:p-6 min-h-[260px] sm:min-h-[320px] font-mono text-[0.7rem] sm:text-[0.85rem] leading-relaxed relative overflow-hidden shadow-2xl">
                     <div className="flex flex-col gap-2 sm:gap-2.5">
-                        {LINES.map((line, i) => (
+                        {lines.map((line, i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, x: -10 }}
@@ -118,7 +125,6 @@ export function LoadingScreen({ name, minMs = 1500 }: Props) {
                             </motion.div>
                         ))}
 
-                        {/* Blinking Cursor */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -133,7 +139,6 @@ export function LoadingScreen({ name, minMs = 1500 }: Props) {
                         </motion.div>
                     </div>
 
-                    {/* Progress Bar inside terminal */}
                     <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1a1a1a]">
                         <motion.div
                             className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"

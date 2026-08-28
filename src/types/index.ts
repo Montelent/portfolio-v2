@@ -67,6 +67,12 @@ export interface SiteConfig {
     accentColor: string;
     theme: 'dark' | 'light';
     projectCategories?: string[];
+    /** Browser tab title. Falls back to "{name} | {heroTitle}". */
+    pageTitle?: string;
+    /** Terminal prompt on the loading screen, e.g. "montel@montelent". */
+    loaderHandle?: string;
+    /** Final highlight line on the loading screen, e.g. "montelent.dev". */
+    loaderEnv?: string;
 }
 
 export interface AdminUser {

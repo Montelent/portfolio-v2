@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, RotateCcw, User, Globe, Mail, AlertTriangle, MapPin, Camera, Loader2 } from 'lucide-react';
+import { Save, RotateCcw, User, Globe, Mail, AlertTriangle, MapPin, Camera, Loader2, Monitor } from 'lucide-react';
 import { usePortfolioStore } from '../../../store/portfolioStore';
 import { useToast } from '../../ui/Toast';
 import { ImageUpload } from '../../ui/ImageUpload';
@@ -73,10 +73,34 @@ export const AdminSettings = () => {
             title: 'Personal Info',
             icon: <User size={18} />,
             fields: [
-                { key: 'name', label: 'Full Name', placeholder: 'Phyo Min Thein', type: 'text' },
-                { key: 'navbarName', label: 'Navbar Display Name', placeholder: 'e.g. Phyo, PMT, Leo...', type: 'text' },
-                { key: 'tagline', label: 'Nickname / Handle', placeholder: 'Leo', type: 'text' },
+                { key: 'name', label: 'Full Name', placeholder: 'Montel Anthony', type: 'text' },
+                { key: 'navbarName', label: 'Navbar Display Name', placeholder: 'e.g. Montel, Montelent...', type: 'text' },
+                { key: 'tagline', label: 'Nickname / Handle', placeholder: 'Montelent', type: 'text' },
                 { key: 'heroTitle', label: 'Hero Title', placeholder: 'Full-Stack Developer', type: 'text' },
+            ],
+        },
+        {
+            title: 'Branding & Loading Screen',
+            icon: <Monitor size={18} />,
+            fields: [
+                {
+                    key: 'pageTitle',
+                    label: 'Browser Tab Title',
+                    placeholder: 'Montel Anthony | Full-Stack Developer',
+                    type: 'text',
+                },
+                {
+                    key: 'loaderHandle',
+                    label: 'Loading Terminal Handle',
+                    placeholder: 'montel@montelent',
+                    type: 'text',
+                },
+                {
+                    key: 'loaderEnv',
+                    label: 'Loading Environment Name',
+                    placeholder: 'montelent.dev',
+                    type: 'text',
+                },
             ],
         },
         {
@@ -84,7 +108,7 @@ export const AdminSettings = () => {
             icon: <Globe size={18} />,
             fields: [
                 { key: 'bio', label: 'Short Bio (Hero Section)', placeholder: 'A short sentence about you...', type: 'textarea' },
-                { key: 'aboutTitle', label: 'About Section Heading', placeholder: "Hi, I'm Phyo Min Thein", type: 'text' },
+                { key: 'aboutTitle', label: 'About Section Heading', placeholder: "Hi, I'm Montel Anthony", type: 'text' },
                 { key: 'aboutMe', label: 'About Me (About Section)', placeholder: 'Tell your story...', type: 'textarea' },
                 { key: 'heroGif', label: 'Hero GIF / Illustration URL', placeholder: 'https://... or leave blank for default', type: 'url' },
             ],
@@ -94,8 +118,8 @@ export const AdminSettings = () => {
             icon: <Mail size={18} />,
             fields: [
                 { key: 'email', label: 'Email', placeholder: 'you@example.com', type: 'email' },
-                { key: 'phone', label: 'Phone', placeholder: '+66 XX XXX XXXX', type: 'text' },
-                { key: 'location', label: 'Location', placeholder: 'Thailand 🇹🇭', type: 'text' },
+                { key: 'phone', label: 'Phone', placeholder: '+234 ...', type: 'text' },
+                { key: 'location', label: 'Location', placeholder: 'Owerri, Nigeria', type: 'text' },
             ],
         },
         {
@@ -132,9 +156,7 @@ export const AdminSettings = () => {
 
     return (
         <div className="max-w-5xl mx-auto text-gray-100 space-y-8">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 relative border-b border-white/5">
-                {/* Decorative underline */}
                 <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-white/10 via-white/5 to-transparent"></div>
                 <div>
                     <h1 className="text-3xl font-bold mb-2 text-white">Platform Settings</h1>
@@ -143,7 +165,6 @@ export const AdminSettings = () => {
             </div>
 
             <form onSubmit={handleSave} className="space-y-8">
-                {/* Profile Preview */}
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -151,7 +172,6 @@ export const AdminSettings = () => {
                 >
                     <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
-                    {/* Hidden file input for profile image */}
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -176,7 +196,6 @@ export const AdminSettings = () => {
                                     ) : (
                                         form.name?.[0] || 'L'
                                     )}
-                                    {/* Camera Icon Overlay */}
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                                         <Camera size={24} className="text-white drop-shadow-md" />
                                         <span className="text-[10px] font-bold tracking-wider uppercase text-white drop-shadow-md">Change</span>
@@ -198,7 +217,6 @@ export const AdminSettings = () => {
 
                     <div className="z-10 w-full sm:w-auto mt-4 sm:mt-0">
                         <label className="flex items-center justify-center gap-3 cursor-pointer rounded-2xl px-6 py-4 transition-all duration-300 border border-white/5 bg-black/40 hover:bg-white/5 group">
-                            {/* Toggle switch */}
                             <div className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-300 ease-in-out border border-white/10 ${form.availableForWork ? 'bg-green-500/20' : 'bg-white/5'}`}>
                                 <span className={`inline-block h-4 w-4 transform rounded-full transition-all duration-300 ease-in-out shadow-sm ${form.availableForWork ? 'translate-x-[22px] bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'translate-x-[4px] bg-gray-400'}`} />
                             </div>
@@ -219,7 +237,6 @@ export const AdminSettings = () => {
                     </div>
                 </motion.div>
 
-                {/* Settings Sections */}
                 <div className="space-y-8">
                     {sections.map((section, si) => (
                         <motion.div
@@ -270,7 +287,6 @@ export const AdminSettings = () => {
                         </motion.div>
                     ))}
 
-                    {/* Project Categories Section */}
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -341,7 +357,6 @@ export const AdminSettings = () => {
                     </motion.div>
                 </div>
 
-                {/* Save Row (Sticky) */}
                 <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 rounded-3xl p-4 sm:px-6 sticky bottom-6 shadow-[0_0_50px_rgba(0,0,0,0.6)] z-40 bg-[#111113]/80 backdrop-blur-md border border-white/10">
                     <div className="w-full sm:w-auto">
                         {!showResetConfirm ? (
