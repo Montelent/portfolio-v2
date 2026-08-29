@@ -45,7 +45,7 @@ export function LoadingScreen({
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0a0a]"
             style={{
-                backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, rgba(6, 182, 212, 0.03) 30%, transparent 60%)'
+                backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(59, 158, 255, 0.08) 0%, rgba(225, 29, 72, 0.05) 30%, transparent 60%)'
             }}
         >
             <motion.div
@@ -59,7 +59,7 @@ export function LoadingScreen({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.1 }}
-                        className="text-[0.55rem] sm:text-[0.6rem] uppercase tracking-[0.4em] text-cyan-500/80 font-mono mb-2 block"
+                        className="text-[0.55rem] sm:text-[0.6rem] uppercase tracking-[0.4em] text-blue-400/80 font-mono mb-2 block"
                     >
                         Terminal Session
                     </motion.span>
@@ -117,7 +117,7 @@ export function LoadingScreen({
                                 <span className={
                                     line.type === 'cmd' ? 'text-[#e5e7eb] font-semibold break-all sm:break-normal' :
                                         line.type === 'success' ? 'text-[#10b981]' :
-                                            line.type === 'highlight' ? 'text-[#cba6f7]' :
+                                            line.type === 'highlight' ? 'text-[#fda4af]' :
                                                 'text-[#8b949e]'
                                 }>
                                     {line.text}
@@ -133,7 +133,7 @@ export function LoadingScreen({
                         >
                             <span className="text-[#3b82f6] font-bold">❯</span>
                             <span
-                                className="w-2 h-[1em] sm:w-2.5 bg-indigo-400 rounded-[1px]"
+                                className="w-2 h-[1em] sm:w-2.5 bg-rose-400 rounded-[1px]"
                                 style={{ opacity: blink ? 1 : 0 }}
                             />
                         </motion.div>
@@ -141,7 +141,7 @@ export function LoadingScreen({
 
                     <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#1a1a1a]">
                         <motion.div
-                            className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"
+                            className="h-full bg-gradient-to-r from-blue-500 via-rose-500 to-red-500"
                             initial={{ width: '0%' }}
                             animate={{ width: '100%' }}
                             transition={{ duration: minMs / 1000, ease: "easeInOut" }}
