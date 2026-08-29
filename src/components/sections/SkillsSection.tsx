@@ -15,7 +15,7 @@ export const SkillsSection = () => {
             <div className="container">
                 <div className="text-center mb-12">
                     <h2 className="text-[2.5rem] font-bold text-white tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-                        Tech <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">Stack</span>
+                        Tech <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">Stack</span>
                     </h2>
                 </div>
             </div>
@@ -40,7 +40,7 @@ export const SkillsSection = () => {
                     {SCROLLING_STACK.map((tech, index) => (
                         <div
                             key={`${tech.id}-${index}`}
-                            className="group w-[100px] h-[100px] md:w-[120px] md:h-[120px] shrink-0 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#00d8ff]/50 hover:shadow-[0_0_30px_rgba(0,216,255,0.2)] hover:-translate-y-2"
+                            className="group w-[100px] h-[100px] md:w-[120px] md:h-[120px] shrink-0 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-[#3b9eff]/50 hover:shadow-[0_0_30px_rgba(59,158,255,0.2)] hover:-translate-y-2"
                             title={tech.name}
                         >
                             <img

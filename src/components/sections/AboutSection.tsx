@@ -10,7 +10,7 @@ export const AboutSection = () => {
             <div className="container relative z-10">
                 <div className="text-center mb-16">
                     <h2 className="text-[2.5rem] md:text-[3rem] font-bold text-white tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-                        About <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">Me</span>
+                        About <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">Me</span>
                     </h2>
                 </div>
 
@@ -29,13 +29,13 @@ export const AboutSection = () => {
                                     src={siteConfig.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80"}
                                     alt={siteConfig.name || "Profile"}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Phyo+Min+Thein&size=400&background=random'; }}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Montel+Anthony&size=400&background=0b1020&color=3b9eff'; }}
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#110526] via-[#110526]/40 to-transparent opacity-60" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#080b14] via-[#080b14]/40 to-transparent opacity-60" />
                             </div>
                         </div>
                         {/* Decorative elements */}
-                        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-r from-[#00d8ff]/20 to-[#8b5cf6]/20 blur-[60px] rounded-full pointer-events-none" />
+                        <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-r from-[#3b9eff]/20 to-[#e11d48]/20 blur-[60px] rounded-full pointer-events-none" />
                     </motion.div>
 
                     {/* Right: Content */}
@@ -51,7 +51,7 @@ export const AboutSection = () => {
                                 if (!title) {
                                     return (
                                         <>
-                                            Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">{siteConfig.name || 'Phyo Min Thein'}</span>
+                                            Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">{siteConfig.name || 'Montel Anthony'}</span>
                                         </>
                                     );
                                 }
@@ -60,7 +60,7 @@ export const AboutSection = () => {
                                 if (imIndex !== -1) {
                                     return (
                                         <>
-                                            {title.substring(0, imIndex + 4)}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">{title.substring(imIndex + 4)}</span>
+                                            {title.substring(0, imIndex + 4)}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">{title.substring(imIndex + 4)}</span>
                                         </>
                                     );
                                 }
@@ -69,7 +69,7 @@ export const AboutSection = () => {
                                 if (amIndex !== -1) {
                                     return (
                                         <>
-                                            {title.substring(0, amIndex + 3)}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">{title.substring(amIndex + 3)}</span>
+                                            {title.substring(0, amIndex + 3)}<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">{title.substring(amIndex + 3)}</span>
                                         </>
                                     );
                                 }
@@ -79,11 +79,11 @@ export const AboutSection = () => {
                                     const lastWord = words.pop();
                                     return (
                                         <>
-                                            {words.join(' ')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">{lastWord}</span>
+                                            {words.join(' ')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">{lastWord}</span>
                                         </>
                                     );
                                 }
-                                return <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6]">{title}</span>;
+                                return <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3b9eff] to-[#e11d48]">{title}</span>;
                             })()}
                         </h3>
                         <p className="text-[1.05rem] text-gray-300 leading-relaxed mb-8">
@@ -92,21 +92,21 @@ export const AboutSection = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
                             <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 transition-colors hover:bg-white/10">
-                                <div className="w-12 h-12 rounded-lg bg-[#00d8ff]/10 text-[#00d8ff] flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-lg bg-[#3b9eff]/10 text-[#3b9eff] flex items-center justify-center">
                                     <User size={24} />
                                 </div>
                                 <div className="overflow-hidden">
                                     <p className="text-sm text-gray-400">Name</p>
-                                    <p className="font-medium text-white truncate truncate w-full" title={siteConfig.name}>{siteConfig.name || "Phyo Min Thein"}</p>
+                                    <p className="font-medium text-white truncate truncate w-full" title={siteConfig.name}>{siteConfig.name || "Montel Anthony"}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 transition-colors hover:bg-white/10">
-                                <div className="w-12 h-12 rounded-lg bg-[#8b5cf6]/10 text-[#8b5cf6] flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-lg bg-[#e11d48]/10 text-[#e11d48] flex items-center justify-center">
                                     <MapPin size={24} />
                                 </div>
                                 <div className="overflow-hidden">
                                     <p className="text-sm text-gray-400">Location</p>
-                                    <p className="font-medium text-white truncate w-full" title={siteConfig.location}>{siteConfig.location || "Thailand 🇹🇭"}</p>
+                                    <p className="font-medium text-white truncate w-full" title={siteConfig.location}>{siteConfig.location || "Owerri, Nigeria"}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 sm:col-span-2 transition-colors hover:bg-white/10">
@@ -115,18 +115,18 @@ export const AboutSection = () => {
                                 </div>
                                 <div className="overflow-hidden">
                                     <p className="text-sm text-gray-400">Email</p>
-                                    <a href={`mailto:${siteConfig.email}`} className="font-medium text-white hover:text-[#00d8ff] transition-colors truncate w-full block" title={siteConfig.email}>{siteConfig.email || "phyominthein.dev@gmail.com"}</a>
+                                    <a href={`mailto:${siteConfig.email}`} className="font-medium text-white hover:text-[#3b9eff] transition-colors truncate w-full block" title={siteConfig.email}>{siteConfig.email || "hello@montelent.com"}</a>
                                 </div>
                             </div>
                         </div>
 
                         {siteConfig.resumeUrl ? (
-                            <a href={siteConfig.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 btn bg-[#8b5cf6] text-white hover:bg-[#9d71f6] shadow-[0_4px_20px_rgba(139,92,246,0.3)] transition-all">
+                            <a href={siteConfig.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 btn bg-[#e11d48] text-white hover:bg-[#f43f5e] shadow-[0_4px_20px_rgba(225,29,72,0.3)] transition-all">
                                 <FileText size={18} />
                                 Download Resume
                             </a>
                         ) : (
-                            <button className="inline-flex items-center gap-2 btn bg-[#8b5cf6] text-white hover:bg-[#9d71f6] shadow-[0_4px_20px_rgba(139,92,246,0.3)] transition-all cursor-not-allowed opacity-80" title="Resume not available">
+                            <button className="inline-flex items-center gap-2 btn bg-[#e11d48] text-white hover:bg-[#f43f5e] shadow-[0_4px_20px_rgba(225,29,72,0.3)] transition-all cursor-not-allowed opacity-80" title="Resume not available">
                                 <FileText size={18} />
                                 Download Resume
                             </button>
