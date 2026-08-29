@@ -18,11 +18,9 @@ export const Navbar = () => {
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        // Simple scroll listener just for the glass background toggle
         const handleScroll = () => {
             setScrolled(window.scrollY > 40);
 
-            // Re-enable Intersection Observer only when scrolling naturally stops
             if (isNavigating.current) {
                 if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
                 scrollTimeoutRef.current = setTimeout(() => {
@@ -32,27 +30,22 @@ export const Navbar = () => {
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
 
-        // High-performance Intersection Observer for active section highlighting
         const observer = new IntersectionObserver(
             (entries) => {
-                if (isNavigating.current) return; // Prevent layout thrashing during smooth scroll
+                if (isNavigating.current) return;
 
-                // Find the section that is currently intersecting the most
                 const visibleSections = entries.filter((entry) => entry.isIntersecting);
                 if (visibleSections.length > 0) {
-                    // Sort by intersection ratio to find the most prominent one
                     visibleSections.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
                     setActiveSection(visibleSections[0].target.id);
                 }
             },
             {
-                // Trigger when section hits the upper/lower center of the viewport
                 rootMargin: '-20% 0px -40% 0px',
                 threshold: [0, 0.25, 0.5, 0.75, 1]
             }
         );
 
-        // Observe only the sections that have corresponding nav links
         const sections = navLinks.map(link => link.href.replace('#', ''));
         sections.forEach((section) => {
             const el = document.getElementById(section);
@@ -69,11 +62,9 @@ export const Navbar = () => {
         setMobileOpen(false);
         const id = href.replace('#', '');
 
-        // Immediately set active and lock the observer
         setActiveSection(id);
         isNavigating.current = true;
 
-        // Fallback unlock just in case
         if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
         scrollTimeoutRef.current = setTimeout(() => {
             isNavigating.current = false;
@@ -96,19 +87,17 @@ export const Navbar = () => {
                 <div
                     className={`flex items-center gap-4 sm:gap-8 px-5 py-2.5 rounded-full border transition-colors duration-500 backdrop-blur-md ${scrolled ? 'bg-[#111113]/80 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'bg-white/[0.02] border-white/5 shadow-none'}`}
                 >
-                    {/* Logo (LEO) */}
                     <button
                         onClick={() => handleNavClick('#hero')}
                         className="font-black tracking-wider text-[1.1rem] px-2 uppercase relative group"
                         style={{ fontFamily: 'var(--font-display)' }}
                     >
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6] transition-opacity duration-300 group-hover:opacity-80">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3b9eff] to-[#e11d48] transition-opacity duration-300 group-hover:opacity-80">
                             {siteConfig.navbarName || (siteConfig.name ? siteConfig.name.split(' ')[0] : 'LEO')}
                         </span>
-                        <div className="absolute -bottom-1 left-2 right-2 h-[2px] bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+                        <div className="absolute -bottom-1 left-2 right-2 h-[2px] bg-gradient-to-r from-[#3b9eff] to-[#e11d48] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
                     </button>
 
-                    {/* Desktop Nav */}
                     <div className="hidden md:flex items-center gap-2">
                         {navLinks.map((link) => {
                             const isActive = activeSection === link.href.replace('#', '');
@@ -131,7 +120,6 @@ export const Navbar = () => {
                         })}
                     </div>
 
-                    {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setMobileOpen(!mobileOpen)}
                         className={`md:hidden p-2 rounded-full transition-colors ${mobileOpen ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
@@ -141,7 +129,6 @@ export const Navbar = () => {
                 </div>
             </motion.nav>
 
-            {/* Mobile Menu */}
             <AnimatePresence>
                 {mobileOpen && (
                     <motion.div
@@ -159,7 +146,7 @@ export const Navbar = () => {
                                     onClick={() => handleNavClick(link.href)}
                                     className={`px-5 py-4 rounded-2xl text-[1rem] font-bold text-left transition-all flex items-center gap-3 ${isActive ? 'bg-white/10 text-white border border-white/5' : 'text-gray-400 hover:bg-white/5 hover:text-white border border-transparent'}`}
                                 >
-                                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#00d8ff] shadow-[0_0_10px_rgba(0,216,255,0.8)]" />}
+                                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#3b9eff] shadow-[0_0_10px_rgba(59,158,255,0.8)]" />}
                                     {link.label}
                                 </button>
                             );

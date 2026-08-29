@@ -74,18 +74,18 @@ export const HeroSection = () => {
                         >
                             {siteConfig.name ? (
                                 <>
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6] block">
+                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3b9eff] to-[#e11d48] block">
                                         {firstWord}
                                     </span>
-                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#f43f5e] to-[#f97316] block">
+                                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e11d48] to-[#f43f5e] block">
                                         {restOfName}
                                     </span>
                                     {/* Reflection */}
                                     <div className="absolute top-[80%] left-0 opacity-20 transform -scale-y-100 blur-[2px] pointer-events-none select-none">
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00d8ff] to-[#8b5cf6] block">
+                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#3b9eff] to-[#e11d48] block">
                                             {firstWord}
                                         </span>
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#f43f5e] to-[#f97316] block">
+                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#e11d48] to-[#f43f5e] block">
                                             {restOfName}
                                         </span>
                                     </div>
@@ -100,7 +100,7 @@ export const HeroSection = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.35 }}
-                            className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-[#00d8ff] mb-6 mt-6 md:mt-10 min-h-[3rem]"
+                            className="text-[clamp(1.5rem,3vw,2.2rem)] font-bold text-[#3b9eff] mb-6 mt-6 md:mt-10 min-h-[3rem]"
                         >
                             {typedText}<span className="animate-blink font-light text-white ml-[2px]">|</span>
                         </motion.h2>
@@ -114,8 +114,6 @@ export const HeroSection = () => {
                         >
                             {(() => {
                                 const bioText = siteConfig.bio || '';
-                                // Robust regex to catch almost any tech role or keyword 
-                                // (Software Engineering, Front-end, Full-stack, DevOps, UI/UX, Mobile App, etc.)
                                 const roleRegex = /(software engineer(?:ing)?|full-?stack(?: development| developer)?|front-?end(?: development| developer)?|back-?end(?: development| developer)?|devops|mobile(?: development| developer| app)?|web(?: development| developer)?|ui\/ux|artificial intelligence|machine learning|ai\/ml|data science|data scientist)/i;
 
                                 const parts = bioText.split(roleRegex);
@@ -123,17 +121,14 @@ export const HeroSection = () => {
                                 return parts.map((part, index) => {
                                     if (!part) return null;
 
-                                    // split() puts capturing groups at odd indexes (1, 3, 5...)
                                     if (index % 2 === 1) {
                                         const lower = part.toLowerCase();
-                                        // Give DevOps / Backend / AI related roles a purple color, others cyan
-                                        const isPurple = lower.includes('devops') || lower.includes('back') || lower.includes('ui/') || lower.includes('machine') || lower.includes('ai') || lower.includes('data');
-                                        const color = isPurple ? 'text-[#8b5cf6]' : 'text-[#00d8ff]';
+                                        const isRed = lower.includes('devops') || lower.includes('back') || lower.includes('ui/') || lower.includes('machine') || lower.includes('ai') || lower.includes('data');
+                                        const color = isRed ? 'text-[#e11d48]' : 'text-[#3b9eff]';
 
                                         return <span key={index} className={`${color} font-medium`}>{part}</span>;
                                     }
 
-                                    // Regular text
                                     return <span key={index}>{part}</span>;
                                 });
                             })()}
@@ -146,7 +141,7 @@ export const HeroSection = () => {
                             transition={{ duration: 0.6, delay: 0.55 }}
                             className="flex gap-4 flex-wrap mb-10"
                         >
-                            <button onClick={scrollToProjects} className="btn bg-[#00d8ff] text-[#110526] hover:bg-[#33e1ff] shadow-[0_4px_20px_rgba(0,216,255,0.3)]">
+                            <button onClick={scrollToProjects} className="btn bg-[#3b9eff] text-[#080b14] hover:bg-[#60b4ff] shadow-[0_4px_20px_rgba(59,158,255,0.3)]">
                                 Explore My Work
                             </button>
                         </motion.div>
@@ -198,9 +193,9 @@ export const HeroSection = () => {
                     <motion.div
                         animate={{ y: [0, 6, 0] }}
                         transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                        className="w-[28px] h-[48px] border-2 border-[#00d8ff] rounded-full flex justify-center py-2"
+                        className="w-[28px] h-[48px] border-2 border-[#3b9eff] rounded-full flex justify-center py-2"
                     >
-                        <div className="w-[4px] h-[8px] bg-[#00d8ff] rounded-full" />
+                        <div className="w-[4px] h-[8px] bg-[#3b9eff] rounded-full" />
                     </motion.div>
                 </motion.div>
             </div>
