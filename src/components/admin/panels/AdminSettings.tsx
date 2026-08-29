@@ -80,7 +80,7 @@ export const AdminSettings = () => {
             ],
         },
         {
-            title: 'Branding & Loading Screen',
+            title: 'Branding, SEO & Loading Screen',
             icon: <Monitor size={18} />,
             fields: [
                 {
@@ -88,6 +88,24 @@ export const AdminSettings = () => {
                     label: 'Browser Tab Title',
                     placeholder: 'Montel Anthony | Full-Stack Developer',
                     type: 'text',
+                },
+                {
+                    key: 'metaDescription',
+                    label: 'SEO / Social Description',
+                    placeholder: 'Short description for Google and link previews...',
+                    type: 'textarea',
+                },
+                {
+                    key: 'siteUrl',
+                    label: 'Canonical Site URL',
+                    placeholder: 'https://montelent.vercel.app',
+                    type: 'url',
+                },
+                {
+                    key: 'ogImage',
+                    label: 'Social Preview Image URL',
+                    placeholder: 'https://... (or leave blank to use profile image)',
+                    type: 'url',
                 },
                 {
                     key: 'loaderHandle',

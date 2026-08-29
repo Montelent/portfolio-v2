@@ -73,6 +73,12 @@ export interface SiteConfig {
     loaderHandle?: string;
     /** Final highlight line on the loading screen, e.g. "montelent.dev". */
     loaderEnv?: string;
+    /** Meta description used for SEO and social previews. Falls back to bio. */
+    metaDescription?: string;
+    /** Canonical site URL, e.g. https://montelent.vercel.app */
+    siteUrl?: string;
+    /** Open Graph / Twitter preview image URL */
+    ogImage?: string;
 }
 
 export interface AdminUser {

@@ -7,6 +7,7 @@ import { SkillsSection } from '../components/sections/SkillsSection';
 import { ContactSection } from '../components/sections/ContactSection';
 import { usePortfolioStore } from '../store/portfolioStore';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
+import { updateDocumentMeta } from '../lib/updateDocumentMeta';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -38,15 +39,22 @@ export const PortfolioPage = () => {
         if (isLoaded) loaderShown = true;
     }, [isLoaded]);
 
-    // Dynamic browser tab title from Admin settings
+    // Dynamic document title + SEO / social meta from Admin settings
     useEffect(() => {
         if (!configLoaded) return;
-        const title =
-            siteConfig.pageTitle?.trim() ||
-            [siteConfig.name, siteConfig.heroTitle].filter(Boolean).join(' | ') ||
-            'Portfolio';
-        document.title = title;
-    }, [configLoaded, siteConfig.pageTitle, siteConfig.name, siteConfig.heroTitle]);
+        updateDocumentMeta(siteConfig);
+    }, [
+        configLoaded,
+        siteConfig.pageTitle,
+        siteConfig.name,
+        siteConfig.heroTitle,
+        siteConfig.metaDescription,
+        siteConfig.bio,
+        siteConfig.siteUrl,
+        siteConfig.ogImage,
+        siteConfig.profileImage,
+        siteConfig.navbarName,
+    ]);
 
     useEffect(() => {
         if (isLoaded && location.hash) {
