@@ -3,22 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Color Palette (Vibrant Purple Theme) */
-  --color-bg: #271249;
-  --color-bg-secondary: #3b1b6d;
-  --color-bg-card: rgba(59, 27, 109, 0.4);
-  --color-bg-glass: rgba(59, 27, 109, 0.3);
+  /* Color Palette (Blue × Red Theme) */
+  --color-bg: #0b1020;
+  --color-bg-secondary: #151c30;
+  --color-bg-card: rgba(21, 28, 48, 0.55);
+  --color-bg-glass: rgba(21, 28, 48, 0.4);
   --color-border: rgba(255, 255, 255, 0.1);
-  --color-border-hover: #00d8ff;
+  --color-border-hover: #3b9eff;
 
   /* Brand Colors */
-  --color-accent: #00d8ff;
-  /* Cyan / Teal */
-  --color-accent-2: #8b5cf6;
-  /* Purple */
+  --color-accent: #3b9eff;
+  /* Electric Blue */
+  --color-accent-2: #e11d48;
+  /* Crimson Red */
   --color-accent-3: #f43f5e;
-  /* Pink */
-  --color-accent-glow: rgba(0, 216, 255, 0.2);
+  /* Rose */
+  --color-accent-glow: rgba(59, 158, 255, 0.2);
 
   /* Text */
   --color-text: #ffffff;
@@ -29,7 +29,7 @@
   --color-success: #3fb950;
   --color-error: #f85149;
   --color-warning: #d29922;
-  --color-info: #00d8ff;
+  --color-info: #3b9eff;
 
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -76,7 +76,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: radial-gradient(circle at top right, #381962 0%, #1e0e3b 50%, #110526 100%);
+  background: radial-gradient(circle at top right, #1a2240 0%, #0c1222 50%, #080b14 100%);
   background-attachment: fixed;
   color: var(--color-text);
   line-height: 1.7;
@@ -162,7 +162,7 @@ a {
 
 .btn-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 24px rgba(225, 29, 72, 0.35);
 }
 
 .btn-ghost {
@@ -192,7 +192,7 @@ a {
 
 .input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(0, 216, 255, 0.15);
+  box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.18);
 }
 
 .input::placeholder {
