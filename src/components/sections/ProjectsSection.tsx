@@ -13,9 +13,7 @@ const ProjectCard = ({ project }: { project: Project }) => {
             to={`/project/${project.id}`}
             className="group h-full bg-white/[0.02] hover:bg-white/[0.04] rounded-3xl overflow-hidden cursor-pointer flex flex-col transition-all duration-500 border border-white/5 hover:border-white/10 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] hover:-translate-y-2 relative"
         >
-            {/* Image Container */}
             <div className="relative h-[220px] overflow-hidden bg-black/40 rounded-t-3xl border-b border-white/5" style={{ isolation: 'isolate', WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}>
-                {/* Inset shadow 'mask' to hide sub-pixel leaks */}
                 <div className="absolute inset-0 z-20 rounded-t-3xl pointer-events-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)]" />
 
                 <img
@@ -30,10 +28,8 @@ const ProjectCard = ({ project }: { project: Project }) => {
                         (e.target as HTMLImageElement).src = `https://via.placeholder.com/800x400/12121e/58a6ff?text=${encodeURIComponent(project.title)}`;
                     }}
                 />
-                {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent from-40% to-black/90 z-10" />
 
-                {/* Featured Star */}
                 {project.featured && (
                     <div className="absolute top-4 right-4 z-20">
                         <div className="relative">
@@ -47,7 +43,6 @@ const ProjectCard = ({ project }: { project: Project }) => {
 
             </div>
 
-            {/* Content */}
             <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-[1.1rem] font-bold mb-2 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2 min-h-[2.1rem] text-white">
                     {project.title}
@@ -56,7 +51,6 @@ const ProjectCard = ({ project }: { project: Project }) => {
                     {project.desc}
                 </p>
 
-                {/* Tech Stack */}
                 <div className="flex flex-wrap items-center content-start gap-1.5 mb-5 min-h-[2.5rem]">
                     {project.technologies.slice(0, 4).map((tech) => (
                         <span key={tech} className="px-2.5 py-1 rounded-lg text-[0.7rem] font-bold border border-white/5 bg-white/[0.03] text-gray-300">
@@ -70,7 +64,6 @@ const ProjectCard = ({ project }: { project: Project }) => {
                     )}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 mt-auto pt-2">
                     <a
                         href={project.url}
@@ -102,7 +95,6 @@ export const ProjectsSection = () => {
     const { projects, projectsLoaded, siteConfig } = usePortfolioStore();
     const [activeTab, setActiveTab] = useState<'projects' | 'certificates'>('projects');
 
-    // Dynamic categories from siteConfig + 'all'
     const CATEGORIES = ['all', ...(siteConfig.projectCategories || [])];
     const [activeCategory, setActiveCategory] = useState('all');
     const [showAllProjects, setShowAllProjects] = useState(false);
@@ -118,16 +110,14 @@ export const ProjectsSection = () => {
             <div className="container">
                 <div className="text-center mb-12 relative z-10">
                     <h2 className="text-[2.5rem] md:text-[3rem] font-black text-white tracking-tight mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-                        Portfolio <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Showcase</span>
+                        Portfolio <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-rose-500">Showcase</span>
                     </h2>
                     <p className="text-gray-400 font-medium max-w-2xl mx-auto text-sm md:text-base">
                         Explore my journey through projects, certifications, and technical expertise. Each section represents a milestone in my continuous learning path.
                     </p>
                 </div>
 
-                {/* Unified Controls Bar */}
                 <div className="flex flex-col items-center gap-8 mb-12">
-                    {/* Main Tab Toggle */}
                     <div className="flex bg-white/5 p-1 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl relative">
                         <button
                             onClick={() => setActiveTab('projects')}
@@ -163,7 +153,6 @@ export const ProjectsSection = () => {
                         </button>
                     </div>
 
-                    {/* Category filters - only show on Projects tab */}
                     <AnimatePresence>
                         {activeTab === 'projects' && (
                             <motion.div
@@ -209,8 +198,6 @@ export const ProjectsSection = () => {
                                 exit={{ opacity: 0, scale: 0.98, y: -10 }}
                                 transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                             >
-
-                                {/* Project Grid */}
                                 <motion.div
                                     id="projects-grid"
                                     layout
@@ -235,7 +222,6 @@ export const ProjectsSection = () => {
                                     </AnimatePresence>
                                 </motion.div>
 
-                                {/* View More Button */}
                                 {sorted.length > 6 && (
                                     <div className="mt-12 flex justify-center">
                                         <button
