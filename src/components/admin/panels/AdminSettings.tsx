@@ -40,7 +40,7 @@ export const AdminSettings = () => {
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('upload_preset', 'profiles');
+        formData.append('upload_preset', 'projects');
 
         try {
             const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -308,7 +308,7 @@ export const AdminSettings = () => {
                                             <ImageUpload
                                                 value={(form as any)[field.key] || ''}
                                                 onChange={(url) => setForm({ ...form, [field.key]: url })}
-                                                uploadPreset={field.type === 'image' ? "profiles" : "documents"}
+                                                uploadPreset={field.type === 'image' ? "projects" : "documents"}
                                             />
                                         ) : (
                                             <input
