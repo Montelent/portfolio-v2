@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Project, SiteConfig, Skill, Experience, Certificate } from '../types';
 import { defaultProjects, defaultSiteConfig, defaultSkills, defaultExperiences, defaultCertificates } from '../data/defaultData';
 import { db, auth } from '../config/firebase';
-import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from 'firebase/firestore';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 
 // ─── Portfolio Store ─────────────────────────────────────────────────────────
@@ -291,21 +291,40 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
 
     // ── Reset ────────────────────────────────────────────────────
     resetToDefaults: async () => {
+        await safeFbCall(async () => {
+            const collections = ['projects', 'skills', 'experiences', 'certificates'];
+            const snapshots = await Promise.all(collections.map((name) => getDocs(collection(db, name))));
+            const operations = snapshots.flatMap((snapshot) => snapshot.docs.map((item) => ({
+                type: 'delete' as const,
+                ref: item.ref,
+            })));
+
+            operations.push(
+                ...defaultProjects.map((item) => ({ type: 'set' as const, ref: doc(db, 'projects', item.id), data: item })),
+                ...defaultSkills.map((item) => ({ type: 'set' as const, ref: doc(db, 'skills', item.id), data: item })),
+                ...defaultExperiences.map((item) => ({ type: 'set' as const, ref: doc(db, 'experiences', item.id), data: item })),
+                ...defaultCertificates.map((item) => ({ type: 'set' as const, ref: doc(db, 'certificates', item.id), data: item })),
+            );
+
+            // Keep each batch below Firestore's 500-write limit.
+            for (let offset = 0; offset < operations.length; offset += 450) {
+                const batch = writeBatch(db);
+                for (const operation of operations.slice(offset, offset + 450)) {
+                    if (operation.type === 'delete') batch.delete(operation.ref);
+                    else batch.set(operation.ref, operation.data);
+                }
+                await batch.commit();
+            }
+
+            await setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig);
+        });
+
         set({
             projects: defaultProjects,
             siteConfig: defaultSiteConfig,
             skills: defaultSkills,
             experiences: defaultExperiences,
             certificates: defaultCertificates,
-        });
-
-        // Re-seed DB
-        await safeFbCall(async () => {
-            await setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig);
-            for (const p of defaultProjects) await setDoc(doc(db, 'projects', p.id), p);
-            for (const s of defaultSkills) await setDoc(doc(db, 'skills', s.id), s);
-            for (const e of defaultExperiences) await setDoc(doc(db, 'experiences', e.id), e);
-            for (const c of defaultCertificates) await setDoc(doc(db, 'certificates', c.id), c);
         });
     },
 }));
