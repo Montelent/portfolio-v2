@@ -136,51 +136,32 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 set({ configLoaded: true });
             });
 
-            // Listen to Projects
+            // Always mirror the server snapshot, including an empty collection.
+            // Never auto-seed content: deleting the final item must remain deleted.
             onSnapshot(collection(db, 'projects'), (snapshot) => {
-                const projects = snapshot.docs.map(d => d.data() as Project);
-                if (projects.length > 0) {
-                    set({ projects, projectsLoaded: true });
-                } else {
-                    if (snapshot.metadata.fromCache === false) {
-                        // Seed initial data if empty and we actually connected to DB
-                        defaultProjects.forEach(p => void safeFbCall(() => setDoc(doc(db, 'projects', p.id), p)).catch(() => undefined));
-                    }
-                    set({ projectsLoaded: true });
-                }
+                const projects = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Project);
+                set({ projects, projectsLoaded: true });
             }, (err) => {
                 console.warn('Firebase projects error:', err);
                 set({ projectsLoaded: true }); // Prevent UI from being stuck
             });
 
-            // Listen to Skills
+            // Empty snapshots are valid data: keep the admin and public UI in sync.
             onSnapshot(collection(db, 'skills'), (snapshot) => {
-                const skills = snapshot.docs.map(d => d.data() as Skill);
-                if (skills.length > 0) {
-                    set({ skills });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultSkills.forEach(s => void safeFbCall(() => setDoc(doc(db, 'skills', s.id), s)).catch(() => undefined));
-                }
+                const skills = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Skill);
+                set({ skills });
             }, (err) => console.warn('Firebase skills error:', err));
 
-            // Listen to Experiences
             onSnapshot(collection(db, 'experiences'), (snapshot) => {
-                const experiences = snapshot.docs.map(d => d.data() as Experience);
-                if (experiences.length > 0) {
-                    set({ experiences });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultExperiences.forEach(e => void safeFbCall(() => setDoc(doc(db, 'experiences', e.id), e)).catch(() => undefined));
-                }
+                const experiences = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Experience);
+                set({ experiences });
             }, (err) => console.warn('Firebase experiences error:', err));
 
-            // Listen to Certificates
+            // An empty collection must clear stale certificates from Zustand.
+            // Do not recreate template records when the final certificate is deleted.
             onSnapshot(collection(db, 'certificates'), (snapshot) => {
-                const certificates = snapshot.docs.map(d => d.data() as Certificate);
-                if (certificates.length > 0) {
-                    set({ certificates });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultCertificates.forEach((c) => void safeFbCall(() => setDoc(doc(db, 'certificates', c.id), c)).catch(() => undefined));
-                }
+                const certificates = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Certificate);
+                set({ certificates });
             }, (err) => console.warn('Firebase certificates error:', err));
         } catch (e) {
             console.error('Error initializing Firebase listeners:', e);
