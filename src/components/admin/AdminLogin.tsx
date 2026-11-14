@@ -11,7 +11,7 @@ export const AdminLogin = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { loginAdmin } = usePortfolioStore();
+    const { loginAdmin, adminLoginError } = usePortfolioStore();
     const { showToast } = useToast();
     const navigate = useNavigate();
 
@@ -23,8 +23,9 @@ export const AdminLogin = () => {
         const success = await loginAdmin(email, password);
         setLoading(false);
         if (!success) {
-            setError('Invalid credentials. Please try again.');
-            showToast('error', 'Access denied. Invalid credentials.');
+            const message = adminLoginError || 'Unable to sign in. Please try again.';
+            setError(message);
+            showToast('error', message);
         } else {
             showToast('success', 'Welcome back! 👋');
         }
