@@ -3,7 +3,7 @@ import type { Project, SiteConfig, Skill, Experience, Certificate } from '../typ
 import { defaultProjects, defaultSiteConfig, defaultSkills, defaultExperiences, defaultCertificates } from '../data/defaultData';
 import { db, auth } from '../config/firebase';
 import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 
 // ─── Portfolio Store ─────────────────────────────────────────────────────────
 
@@ -59,9 +59,9 @@ interface PortfolioStore {
 const safeFbCall = async (callback: () => Promise<void>) => {
     try {
         await callback();
-    } catch (e: any) {
-        console.error('Firebase operation failed:', e);
-        // Fallback or handle appropriately
+    } catch (error) {
+        console.error('Firebase operation failed:', error);
+        throw error;
     }
 };
 
@@ -104,8 +104,22 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
 
         try {
             // Listen to Auth State
-            onAuthStateChanged(auth, (user) => {
-                set({ isAdminLoggedIn: !!user, authInitialized: true });
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    set({ isAdminLoggedIn: false, authInitialized: true });
+                    return;
+                }
+
+                try {
+                    const token = await getIdTokenResult(user);
+                    set({
+                        isAdminLoggedIn: token.claims.admin === true,
+                        authInitialized: true,
+                    });
+                } catch (error) {
+                    console.error('Unable to verify administrator access:', error);
+                    set({ isAdminLoggedIn: false, authInitialized: true });
+                }
             });
 
             // Listen to SiteConfig
@@ -115,7 +129,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 } else {
                     if (snapshot.metadata.fromCache === false) {
                         // Seed initial config if it doesn't exist on the server
-                        safeFbCall(() => setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig));
+                        void safeFbCall(() => setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig)).catch(() => undefined);
                     }
                     // Always set loaded to true so we don't freeze the app if cache is empty
                     set({ configLoaded: true });
@@ -133,7 +147,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 } else {
                     if (snapshot.metadata.fromCache === false) {
                         // Seed initial data if empty and we actually connected to DB
-                        defaultProjects.forEach(p => safeFbCall(() => setDoc(doc(db, 'projects', p.id), p)));
+                        defaultProjects.forEach(p => void safeFbCall(() => setDoc(doc(db, 'projects', p.id), p)).catch(() => undefined));
                     }
                     set({ projectsLoaded: true });
                 }
@@ -148,7 +162,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 if (skills.length > 0) {
                     set({ skills });
                 } else if (snapshot.metadata.fromCache === false) {
-                    defaultSkills.forEach(s => safeFbCall(() => setDoc(doc(db, 'skills', s.id), s)));
+                    defaultSkills.forEach(s => void safeFbCall(() => setDoc(doc(db, 'skills', s.id), s)).catch(() => undefined));
                 }
             }, (err) => console.warn('Firebase skills error:', err));
 
@@ -158,7 +172,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 if (experiences.length > 0) {
                     set({ experiences });
                 } else if (snapshot.metadata.fromCache === false) {
-                    defaultExperiences.forEach(e => safeFbCall(() => setDoc(doc(db, 'experiences', e.id), e)));
+                    defaultExperiences.forEach(e => void safeFbCall(() => setDoc(doc(db, 'experiences', e.id), e)).catch(() => undefined));
                 }
             }, (err) => console.warn('Firebase experiences error:', err));
 
@@ -168,7 +182,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 if (certificates.length > 0) {
                     set({ certificates });
                 } else if (snapshot.metadata.fromCache === false) {
-                    defaultCertificates.forEach((c) => safeFbCall(() => setDoc(doc(db, 'certificates', c.id), c)));
+                    defaultCertificates.forEach((c) => void safeFbCall(() => setDoc(doc(db, 'certificates', c.id), c)).catch(() => undefined));
                 }
             }, (err) => console.warn('Firebase certificates error:', err));
         } catch (e) {
@@ -253,7 +267,12 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
     // ── Admin actions ────────────────────────────────────────────
     loginAdmin: async (email, password) => {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+            const token = await getIdTokenResult(credential.user);
+            if (token.claims.admin !== true) {
+                await signOut(auth);
+                return false;
+            }
             return true;
         } catch (e) {
             console.error('Firebase Auth error:', e);
