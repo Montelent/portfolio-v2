@@ -96,16 +96,32 @@ export const AdminCertificates = () => {
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     const [viewImage, setViewImage] = useState<string | null>(null);
 
-    const handleSave = (c: Certificate) => {
-        if (addingNew) {
-            c.order = certificates.length + 1;
-            addCertificate(c);
-            showToast('success', 'Certificate added!');
-            setAddingNew(false);
-        } else {
-            updateCertificate(c.id, c);
-            showToast('success', 'Certificate updated!');
-            setEditing(null);
+    const handleSave = async (c: Certificate) => {
+        try {
+            if (addingNew) {
+                c.order = certificates.length + 1;
+                await addCertificate(c);
+                showToast('success', 'Certificate added!');
+                setAddingNew(false);
+            } else {
+                await updateCertificate(c.id, c);
+                showToast('success', 'Certificate updated!');
+                setEditing(null);
+            }
+        } catch (error) {
+            console.error('Unable to save certificate:', error);
+            showToast('error', 'Certificate could not be saved. Please try again.');
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteCertificate(id);
+            showToast('success', 'Deleted');
+            setConfirmDelete(null);
+        } catch (error) {
+            console.error('Unable to delete certificate:', error);
+            showToast('error', 'Certificate could not be deleted.');
         }
     };
 
@@ -117,8 +133,13 @@ export const AdminCertificates = () => {
         const temp = newCerts[index].order;
         newCerts[index].order = newCerts[index + direction].order;
         newCerts[index + direction].order = temp;
-        await reorderCertificates(newCerts);
-        showToast('success', 'Order updated');
+        try {
+            await reorderCertificates(newCerts);
+            showToast('success', 'Order updated');
+        } catch (error) {
+            console.error('Unable to reorder certificates:', error);
+            showToast('error', 'Certificate order could not be saved.');
+        }
     };
 
     if (!configLoaded) {
@@ -197,7 +218,7 @@ export const AdminCertificates = () => {
                                         </button>
                                         {confirmDelete === cert.id ? (
                                             <div className="flex items-center gap-2 bg-red-500/10 px-3 h-9 rounded-lg border border-red-500/20 ml-1">
-                                                <button onClick={() => { deleteCertificate(cert.id); showToast('success', 'Deleted'); setConfirmDelete(null); }} className="text-xs font-bold text-red-400 hover:text-red-300">Del</button>
+                                                <button onClick={() => void handleDelete(cert.id)} className="text-xs font-bold text-red-400 hover:text-red-300">Del</button>
                                                 <div className="w-px h-3 bg-red-500/30"></div>
                                                 <button onClick={() => setConfirmDelete(null)} className="text-xs font-semibold text-gray-400 hover:text-gray-300">Cancel</button>
                                             </div>
