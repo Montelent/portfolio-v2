@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import type { Project, SiteConfig, Skill, Experience, Certificate } from '../types';
 import { defaultProjects, defaultSiteConfig, defaultSkills, defaultExperiences, defaultCertificates } from '../data/defaultData';
 import { db, auth } from '../config/firebase';
-import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from 'firebase/firestore';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, getDoc, writeBatch } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 // ─── Portfolio Store ─────────────────────────────────────────────────────────
 
@@ -113,9 +113,9 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 }
 
                 try {
-                    const token = await getIdTokenResult(user);
+                    const adminRecord = await getDoc(doc(db, 'admins', user.uid));
                     set({
-                        isAdminLoggedIn: token.claims.admin === true,
+                        isAdminLoggedIn: adminRecord.exists() && adminRecord.data().enabled === true,
                         authInitialized: true,
                     });
                 } catch (error) {
@@ -249,13 +249,14 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
         set({ adminLoginError: '' });
         try {
             const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-            // Force-refresh the ID token so a recently assigned custom claim is picked up.
-            const token = await getIdTokenResult(credential.user, true);
-            if (token.claims.admin !== true) {
+            // Verify this user against the project's explicit Firestore admin allowlist.
+            // No custom claims or Firebase Admin SDK setup are required.
+            const adminRecord = await getDoc(doc(db, 'admins', credential.user.uid));
+            if (!adminRecord.exists() || adminRecord.data().enabled !== true) {
                 await signOut(auth);
                 set({
                     isAdminLoggedIn: false,
-                    adminLoginError: 'Your Firebase account is valid, but it has not been granted portfolio administrator access. Assign the admin: true custom claim to this user, then sign in again.',
+                    adminLoginError: 'Your Firebase account is valid, but it is not on this portfolio's admin allowlist. Ask the project owner to add your UID to the admins collection and set enabled to true.',
                 });
                 return false;
             }
