@@ -14,6 +14,7 @@ interface PortfolioStore {
     experiences: Experience[];
     certificates: Certificate[];
     isAdminLoggedIn: boolean;
+    adminLoginError: string;
     isInitialized: boolean;
     projectsLoaded: boolean;
     configLoaded: boolean;
@@ -93,6 +94,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
     experiences: [],
     certificates: [],
     isAdminLoggedIn: false,
+    adminLoginError: '',
     isInitialized: false,
     projectsLoaded: false,
     configLoaded: false,
@@ -244,16 +246,37 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
 
     // ── Admin actions ────────────────────────────────────────────
     loginAdmin: async (email, password) => {
+        set({ adminLoginError: '' });
         try {
-            const credential = await signInWithEmailAndPassword(auth, email, password);
-            const token = await getIdTokenResult(credential.user);
+            const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+            // Force-refresh the ID token so a recently assigned custom claim is picked up.
+            const token = await getIdTokenResult(credential.user, true);
             if (token.claims.admin !== true) {
                 await signOut(auth);
+                set({
+                    isAdminLoggedIn: false,
+                    adminLoginError: 'Your Firebase account is valid, but it has not been granted portfolio administrator access. Assign the admin: true custom claim to this user, then sign in again.',
+                });
                 return false;
             }
+            set({ isAdminLoggedIn: true, adminLoginError: '' });
             return true;
-        } catch (e) {
-            console.error('Firebase Auth error:', e);
+        } catch (error) {
+            console.error('Firebase Auth error:', error);
+            const code = (error as { code?: string })?.code;
+            const messages: Record<string, string> = {
+                'auth/invalid-credential': 'The email or password is incorrect. Check the credentials in Firebase Authentication.',
+                'auth/user-not-found': 'No Firebase Authentication user exists with this email address.',
+                'auth/wrong-password': 'The password is incorrect. Try again or reset the password in Firebase Authentication.',
+                'auth/invalid-email': 'Enter a valid email address.',
+                'auth/too-many-requests': 'Too many login attempts. Wait a while before trying again.',
+                'auth/network-request-failed': 'A network error prevented Firebase Authentication from completing the login. Check your connection and try again.',
+                'auth/operation-not-allowed': 'Email/password sign-in is disabled for this Firebase project. Enable it under Authentication → Sign-in method.',
+            };
+            set({
+                isAdminLoggedIn: false,
+                adminLoginError: messages[code || ''] || 'Firebase could not complete sign-in. Check the browser console and Firebase Authentication settings.',
+            });
             return false;
         }
     },
