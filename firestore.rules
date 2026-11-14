@@ -2,13 +2,21 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // A signed-in Firebase account is not automatically a portfolio administrator.
-    // Set the custom claim with the Firebase Admin SDK (see docs/ADMIN_SECURITY.md).
+    // Admins are explicitly allowlisted by the project owner in admins/{uid}.
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.enabled == true;
     }
 
-    // Portfolio content is public; mutations are restricted to trusted admins.
+    // A signed-in user may read only their own record to verify admin access.
+    // Admin records cannot be managed from the public client.
+    match /admins/{uid} {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    // Portfolio content is public; mutations are restricted to allowlisted admins.
     match /projects/{projectId} {
       allow read: if true;
       allow write: if isAdmin();
