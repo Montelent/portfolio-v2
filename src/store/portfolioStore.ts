@@ -294,29 +294,22 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
         await safeFbCall(async () => {
             const collections = ['projects', 'skills', 'experiences', 'certificates'];
             const snapshots = await Promise.all(collections.map((name) => getDocs(collection(db, name))));
-            const operations = snapshots.flatMap((snapshot) => snapshot.docs.map((item) => ({
-                type: 'delete' as const,
-                ref: item.ref,
-            })));
+            const documentRefs = snapshots.flatMap((snapshot) => snapshot.docs.map((item) => item.ref));
 
-            operations.push(
-                ...defaultProjects.map((item) => ({ type: 'set' as const, ref: doc(db, 'projects', item.id), data: item })),
-                ...defaultSkills.map((item) => ({ type: 'set' as const, ref: doc(db, 'skills', item.id), data: item })),
-                ...defaultExperiences.map((item) => ({ type: 'set' as const, ref: doc(db, 'experiences', item.id), data: item })),
-                ...defaultCertificates.map((item) => ({ type: 'set' as const, ref: doc(db, 'certificates', item.id), data: item })),
-            );
-
-            // Keep each batch below Firestore's 500-write limit.
-            for (let offset = 0; offset < operations.length; offset += 450) {
+            // Keep each delete batch below Firestore's 500-write limit.
+            for (let offset = 0; offset < documentRefs.length; offset += 450) {
                 const batch = writeBatch(db);
-                for (const operation of operations.slice(offset, offset + 450)) {
-                    if (operation.type === 'delete') batch.delete(operation.ref);
-                    else batch.set(operation.ref, operation.data);
-                }
+                documentRefs.slice(offset, offset + 450).forEach((ref) => batch.delete(ref));
                 await batch.commit();
             }
 
             await setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig);
+            await Promise.all([
+                ...defaultProjects.map((item) => setDoc(doc(db, 'projects', item.id), item)),
+                ...defaultSkills.map((item) => setDoc(doc(db, 'skills', item.id), item)),
+                ...defaultExperiences.map((item) => setDoc(doc(db, 'experiences', item.id), item)),
+                ...defaultCertificates.map((item) => setDoc(doc(db, 'certificates', item.id), item)),
+            ]);
         });
 
         set({
