@@ -256,7 +256,7 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 await signOut(auth);
                 set({
                     isAdminLoggedIn: false,
-                    adminLoginError: 'Your Firebase account is valid, but it is not on this portfolio's admin allowlist. Ask the project owner to add your UID to the admins collection and set enabled to true.',
+                    adminLoginError: "Your Firebase account is valid, but it is not on this portfolio's admin allowlist. Ask the project owner to add your UID to the admins collection and set enabled to true.",
                 });
                 return false;
             }
