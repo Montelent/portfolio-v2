@@ -56,16 +56,26 @@ export const AdminSettings = () => {
         }
     }, [siteConfig, configLoaded]);
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        updateSiteConfig(form);
-        showToast('success', 'Settings saved successfully!');
+        try {
+            await updateSiteConfig(form);
+            showToast('success', 'Settings saved successfully!');
+        } catch (error) {
+            console.error('Unable to save portfolio settings:', error);
+            showToast('error', 'Settings could not be saved. Please try again.');
+        }
     };
 
-    const handleReset = () => {
-        resetToDefaults();
-        showToast('info', 'All data reset to defaults.');
-        setShowResetConfirm(false);
+    const handleReset = async () => {
+        try {
+            await resetToDefaults();
+            showToast('info', 'Default content restored.');
+            setShowResetConfirm(false);
+        } catch (error) {
+            console.error('Unable to reset portfolio data:', error);
+            showToast('error', 'Reset failed. Your existing data may be unchanged.');
+        }
     };
 
     const sections = [
