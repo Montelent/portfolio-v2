@@ -18,7 +18,18 @@ export const AdminSettings = () => {
         if (!file) return;
 
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            showToast('error', 'Please select a JPG, PNG, or WEBP image.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('error', 'Profile image must not exceed 10MB.');
+            e.target.value = '';
+            return;
+        }
 
         if (!cloudName) {
             showToast('error', 'Cloudinary config missing.');
@@ -30,7 +41,6 @@ export const AdminSettings = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'profiles');
-        if (apiKey) formData.append('api_key', apiKey);
 
         try {
             const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
