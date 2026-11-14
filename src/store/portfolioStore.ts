@@ -127,12 +127,9 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 if (snapshot.exists()) {
                     set({ siteConfig: snapshot.data() as SiteConfig, configLoaded: true });
                 } else {
-                    if (snapshot.metadata.fromCache === false) {
-                        // Seed initial config if it doesn't exist on the server
-                        void safeFbCall(() => setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig)).catch(() => undefined);
-                    }
-                    // Always set loaded to true so we don't freeze the app if cache is empty
-                    set({ configLoaded: true });
+                    // Use safe, portfolio-specific defaults locally. Public visitors must
+                    // not need write permission merely to initialize the site.
+                    set({ siteConfig: defaultSiteConfig, configLoaded: true });
                 }
             }, (err) => {
                 console.warn('Firebase config error (are credentials/rules set?):', err);
