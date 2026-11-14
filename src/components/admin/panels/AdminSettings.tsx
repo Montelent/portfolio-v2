@@ -18,7 +18,18 @@ export const AdminSettings = () => {
         if (!file) return;
 
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            showToast('error', 'Please select a JPG, PNG, or WEBP image.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            showToast('error', 'Profile image must not exceed 10MB.');
+            e.target.value = '';
+            return;
+        }
 
         if (!cloudName) {
             showToast('error', 'Cloudinary config missing.');
@@ -30,7 +41,6 @@ export const AdminSettings = () => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'profiles');
-        if (apiKey) formData.append('api_key', apiKey);
 
         try {
             const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -56,16 +66,26 @@ export const AdminSettings = () => {
         }
     }, [siteConfig, configLoaded]);
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        updateSiteConfig(form);
-        showToast('success', 'Settings saved successfully!');
+        try {
+            await updateSiteConfig(form);
+            showToast('success', 'Settings saved successfully!');
+        } catch (error) {
+            console.error('Unable to save portfolio settings:', error);
+            showToast('error', 'Settings could not be saved. Please try again.');
+        }
     };
 
-    const handleReset = () => {
-        resetToDefaults();
-        showToast('info', 'All data reset to defaults.');
-        setShowResetConfirm(false);
+    const handleReset = async () => {
+        try {
+            await resetToDefaults();
+            showToast('info', 'Default content restored.');
+            setShowResetConfirm(false);
+        } catch (error) {
+            console.error('Unable to reset portfolio data:', error);
+            showToast('error', 'Reset failed. Your existing data may be unchanged.');
+        }
     };
 
     const sections = [

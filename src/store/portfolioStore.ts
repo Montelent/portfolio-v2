@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import type { Project, SiteConfig, Skill, Experience, Certificate } from '../types';
 import { defaultProjects, defaultSiteConfig, defaultSkills, defaultExperiences, defaultCertificates } from '../data/defaultData';
 import { db, auth } from '../config/firebase';
-import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, setDoc, deleteDoc, onSnapshot, getDocs, writeBatch } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged, getIdTokenResult } from 'firebase/auth';
 
 // ─── Portfolio Store ─────────────────────────────────────────────────────────
 
@@ -59,9 +59,9 @@ interface PortfolioStore {
 const safeFbCall = async (callback: () => Promise<void>) => {
     try {
         await callback();
-    } catch (e: any) {
-        console.error('Firebase operation failed:', e);
-        // Fallback or handle appropriately
+    } catch (error) {
+        console.error('Firebase operation failed:', error);
+        throw error;
     }
 };
 
@@ -104,8 +104,22 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
 
         try {
             // Listen to Auth State
-            onAuthStateChanged(auth, (user) => {
-                set({ isAdminLoggedIn: !!user, authInitialized: true });
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    set({ isAdminLoggedIn: false, authInitialized: true });
+                    return;
+                }
+
+                try {
+                    const token = await getIdTokenResult(user);
+                    set({
+                        isAdminLoggedIn: token.claims.admin === true,
+                        authInitialized: true,
+                    });
+                } catch (error) {
+                    console.error('Unable to verify administrator access:', error);
+                    set({ isAdminLoggedIn: false, authInitialized: true });
+                }
             });
 
             // Listen to SiteConfig
@@ -113,63 +127,41 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
                 if (snapshot.exists()) {
                     set({ siteConfig: snapshot.data() as SiteConfig, configLoaded: true });
                 } else {
-                    if (snapshot.metadata.fromCache === false) {
-                        // Seed initial config if it doesn't exist on the server
-                        safeFbCall(() => setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig));
-                    }
-                    // Always set loaded to true so we don't freeze the app if cache is empty
-                    set({ configLoaded: true });
+                    // Use safe, portfolio-specific defaults locally. Public visitors must
+                    // not need write permission merely to initialize the site.
+                    set({ siteConfig: defaultSiteConfig, configLoaded: true });
                 }
             }, (err) => {
                 console.warn('Firebase config error (are credentials/rules set?):', err);
                 set({ configLoaded: true });
             });
 
-            // Listen to Projects
+            // Always mirror the server snapshot, including an empty collection.
+            // Never auto-seed content: deleting the final item must remain deleted.
             onSnapshot(collection(db, 'projects'), (snapshot) => {
-                const projects = snapshot.docs.map(d => d.data() as Project);
-                if (projects.length > 0) {
-                    set({ projects, projectsLoaded: true });
-                } else {
-                    if (snapshot.metadata.fromCache === false) {
-                        // Seed initial data if empty and we actually connected to DB
-                        defaultProjects.forEach(p => safeFbCall(() => setDoc(doc(db, 'projects', p.id), p)));
-                    }
-                    set({ projectsLoaded: true });
-                }
+                const projects = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Project);
+                set({ projects, projectsLoaded: true });
             }, (err) => {
                 console.warn('Firebase projects error:', err);
                 set({ projectsLoaded: true }); // Prevent UI from being stuck
             });
 
-            // Listen to Skills
+            // Empty snapshots are valid data: keep the admin and public UI in sync.
             onSnapshot(collection(db, 'skills'), (snapshot) => {
-                const skills = snapshot.docs.map(d => d.data() as Skill);
-                if (skills.length > 0) {
-                    set({ skills });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultSkills.forEach(s => safeFbCall(() => setDoc(doc(db, 'skills', s.id), s)));
-                }
+                const skills = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Skill);
+                set({ skills });
             }, (err) => console.warn('Firebase skills error:', err));
 
-            // Listen to Experiences
             onSnapshot(collection(db, 'experiences'), (snapshot) => {
-                const experiences = snapshot.docs.map(d => d.data() as Experience);
-                if (experiences.length > 0) {
-                    set({ experiences });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultExperiences.forEach(e => safeFbCall(() => setDoc(doc(db, 'experiences', e.id), e)));
-                }
+                const experiences = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Experience);
+                set({ experiences });
             }, (err) => console.warn('Firebase experiences error:', err));
 
-            // Listen to Certificates
+            // An empty collection must clear stale certificates from Zustand.
+            // Do not recreate template records when the final certificate is deleted.
             onSnapshot(collection(db, 'certificates'), (snapshot) => {
-                const certificates = snapshot.docs.map(d => d.data() as Certificate);
-                if (certificates.length > 0) {
-                    set({ certificates });
-                } else if (snapshot.metadata.fromCache === false) {
-                    defaultCertificates.forEach((c) => safeFbCall(() => setDoc(doc(db, 'certificates', c.id), c)));
-                }
+                const certificates = snapshot.docs.map(d => ({ ...d.data(), id: d.id }) as Certificate);
+                set({ certificates });
             }, (err) => console.warn('Firebase certificates error:', err));
         } catch (e) {
             console.error('Error initializing Firebase listeners:', e);
@@ -253,7 +245,12 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
     // ── Admin actions ────────────────────────────────────────────
     loginAdmin: async (email, password) => {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+            const token = await getIdTokenResult(credential.user);
+            if (token.claims.admin !== true) {
+                await signOut(auth);
+                return false;
+            }
             return true;
         } catch (e) {
             console.error('Firebase Auth error:', e);
@@ -272,21 +269,33 @@ export const usePortfolioStore = create<PortfolioStore>((set, get) => ({
 
     // ── Reset ────────────────────────────────────────────────────
     resetToDefaults: async () => {
+        await safeFbCall(async () => {
+            const collections = ['projects', 'skills', 'experiences', 'certificates'];
+            const snapshots = await Promise.all(collections.map((name) => getDocs(collection(db, name))));
+            const documentRefs = snapshots.flatMap((snapshot) => snapshot.docs.map((item) => item.ref));
+
+            // Keep each delete batch below Firestore's 500-write limit.
+            for (let offset = 0; offset < documentRefs.length; offset += 450) {
+                const batch = writeBatch(db);
+                documentRefs.slice(offset, offset + 450).forEach((ref) => batch.delete(ref));
+                await batch.commit();
+            }
+
+            await setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig);
+            await Promise.all([
+                ...defaultProjects.map((item) => setDoc(doc(db, 'projects', item.id), item)),
+                ...defaultSkills.map((item) => setDoc(doc(db, 'skills', item.id), item)),
+                ...defaultExperiences.map((item) => setDoc(doc(db, 'experiences', item.id), item)),
+                ...defaultCertificates.map((item) => setDoc(doc(db, 'certificates', item.id), item)),
+            ]);
+        });
+
         set({
             projects: defaultProjects,
             siteConfig: defaultSiteConfig,
             skills: defaultSkills,
             experiences: defaultExperiences,
             certificates: defaultCertificates,
-        });
-
-        // Re-seed DB
-        await safeFbCall(async () => {
-            await setDoc(doc(db, 'config', 'siteConfig'), defaultSiteConfig);
-            for (const p of defaultProjects) await setDoc(doc(db, 'projects', p.id), p);
-            for (const s of defaultSkills) await setDoc(doc(db, 'skills', s.id), s);
-            for (const e of defaultExperiences) await setDoc(doc(db, 'experiences', e.id), e);
-            for (const c of defaultCertificates) await setDoc(doc(db, 'certificates', c.id), c);
         });
     },
 }));

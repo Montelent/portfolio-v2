@@ -299,28 +299,43 @@ export const AdminProjects = () => {
         const hasChanged = localProjects.some((p, i) => p.id !== sorted[i]?.id);
         if (hasChanged) {
             const updated = localProjects.map((p, index) => ({ ...p, order: index + 1 }));
-            await reorderProjects(updated);
-            showToast('success', 'Order updated');
+            try {
+                await reorderProjects(updated);
+                showToast('success', 'Order updated');
+            } catch (error) {
+                console.error('Unable to reorder projects:', error);
+                showToast('error', 'Project order could not be saved.');
+            }
         }
     };
 
-    const handleSave = (project: Project) => {
-        if (addingNew) {
-            addProject(project);
-            showToast('success', `"${project.title}" added successfully!`);
-            setAddingNew(false);
-        } else {
-            updateProject(project.id, project);
-            showToast('success', `"${project.title}" updated!`);
-            setEditing(null);
+    const handleSave = async (project: Project) => {
+        try {
+            if (addingNew) {
+                await addProject(project);
+                showToast('success', `"${project.title}" added successfully!`);
+                setAddingNew(false);
+            } else {
+                await updateProject(project.id, project);
+                showToast('success', `"${project.title}" updated!`);
+                setEditing(null);
+            }
+        } catch (error) {
+            console.error('Unable to save project:', error);
+            showToast('error', 'Project could not be saved. Please try again.');
         }
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = async (id: string) => {
         const p = projects.find(x => x.id === id);
-        deleteProject(id);
-        showToast('success', `"${p?.title}" deleted.`);
-        setConfirmDelete(null);
+        try {
+            await deleteProject(id);
+            showToast('success', `"${p?.title}" deleted.`);
+            setConfirmDelete(null);
+        } catch (error) {
+            console.error('Unable to delete project:', error);
+            showToast('error', 'Project could not be deleted.');
+        }
     };
 
     if (!projectsLoaded) {

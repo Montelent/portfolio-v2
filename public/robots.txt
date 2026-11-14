@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/*
 
-Sitemap: https://phyominthein.com/sitemap.xml
+Sitemap: https://portfolio.montelent.com/sitemap.xml

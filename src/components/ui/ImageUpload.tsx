@@ -19,9 +19,25 @@ export const ImageUpload = ({ value, onChange, className = '', uploadPreset }: I
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Check for env variables
+        const isDocument = uploadPreset === 'documents';
+        const allowedTypes = isDocument
+            ? ['application/pdf']
+            : ['image/jpeg', 'image/png', 'image/webp'];
+
+        if (!allowedTypes.includes(file.type)) {
+            setError(isDocument ? 'Please select a PDF document.' : 'Please select a JPG, PNG, or WEBP image.');
+            e.target.value = '';
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            setError('File size must not exceed 10MB.');
+            e.target.value = '';
+            return;
+        }
+
+        // Check for environment variables.
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-        const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
 
         if (!cloudName) {
             setError("Cloudinary config missing. Please check your .env");
@@ -40,9 +56,6 @@ export const ImageUpload = ({ value, onChange, className = '', uploadPreset }: I
         formData.append('file', file);
         formData.append('upload_preset', uploadPreset);
 
-        if (apiKey) {
-            formData.append('api_key', apiKey);
-        }
 
         try {
             const endpointType = uploadPreset === 'documents' ? 'auto' : 'image';
