@@ -96,15 +96,31 @@ export const AdminSkills = () => {
     const [addingNew, setAddingNew] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-    const handleSave = (skill: Skill) => {
-        if (addingNew) {
-            addSkill(skill);
-            showToast('success', `"${skill.name}" added!`);
-            setAddingNew(false);
-        } else {
-            updateSkill(skill.id, skill);
-            showToast('success', `"${skill.name}" updated!`);
-            setEditing(null);
+    const handleSave = async (skill: Skill) => {
+        try {
+            if (addingNew) {
+                await addSkill(skill);
+                showToast('success', `"${skill.name}" added!`);
+                setAddingNew(false);
+            } else {
+                await updateSkill(skill.id, skill);
+                showToast('success', `"${skill.name}" updated!`);
+                setEditing(null);
+            }
+        } catch (error) {
+            console.error('Unable to save technology:', error);
+            showToast('error', 'Technology could not be saved. Please try again.');
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteSkill(id);
+            showToast('success', 'Tech deleted.');
+            setConfirmDelete(null);
+        } catch (error) {
+            console.error('Unable to delete technology:', error);
+            showToast('error', 'Technology could not be deleted.');
         }
     };
 
@@ -160,7 +176,7 @@ export const AdminSkills = () => {
                             </button>
                             {confirmDelete === skill.id ? (
                                 <div className="flex items-center gap-2 bg-red-500/10 px-3 h-9 rounded-lg border border-red-500/20 ml-1">
-                                    <button onClick={() => { deleteSkill(skill.id); showToast('success', 'Tech deleted.'); setConfirmDelete(null); }} className="text-xs font-bold text-red-400 hover:text-red-300">Del</button>
+                                    <button onClick={() => void handleDelete(skill.id)} className="text-xs font-bold text-red-400 hover:text-red-300">Del</button>
                                     <div className="w-px h-3 bg-red-500/30"></div>
                                     <button onClick={() => setConfirmDelete(null)} className="text-xs font-semibold text-gray-400 hover:text-gray-300">Cancel</button>
                                 </div>
