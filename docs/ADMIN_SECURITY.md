@@ -1,56 +1,67 @@
 # Admin access and Firebase setup
 
-## Required before deploying these changes
+This portfolio uses a Firestore admin allowlist. A person may have a normal Firebase Authentication account, but **only users explicitly added to the Firestore `admins` collection can access the Admin Dashboard or modify portfolio data**.
 
-Firestore writes now require the Firebase Authentication custom claim `admin: true`.
-A normal signed-in account is deliberately not enough. Until the claim is assigned, the admin dashboard will reject that account and Firestore will deny writes.
+This supports multiple administrators, works when the project is forked, and requires no custom claims, Firebase Admin SDK credentials, hard-coded email addresses, or UID values in frontend code.
 
-### 1. Assign the administrator claim
+## 1. Create an Authentication user
 
-Use a trusted machine with Node.js and the Firebase Admin SDK installed. Do not put a service-account JSON file or Admin SDK credentials in this repository or in any `VITE_*` environment variable.
+In Firebase Console, open **Authentication → Users → Add user** and create an account with an email and password.
 
-Set Application Default Credentials for your Firebase project, then run a one-time script similar to:
+Make sure Email/Password is enabled under **Authentication → Sign-in method**.
 
-```js
-import { applicationDefault, initializeApp } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+## 2. Add the user to the admin allowlist
 
-initializeApp({ credential: applicationDefault() });
+1. Copy the user's UID from **Authentication → Users**.
+2. Open **Firestore Database → Data**.
+3. Create a collection named `admins` if it does not exist.
+4. Create a document whose **document ID is exactly the user's Firebase Authentication UID**.
+5. Add this field:
 
-const uid = 'REPLACE_WITH_YOUR_FIREBASE_AUTH_USER_UID';
-const auth = getAuth();
-const user = await auth.getUser(uid);
+| Field | Type | Value |
+|---|---|---|
+| `enabled` | boolean | `true` |
 
-await auth.setCustomUserClaims(uid, {
-  ...(user.customClaims ?? {}),
-  admin: true,
-});
+The structure should look like:
 
-console.log(`Administrator claim assigned to ${uid}`);
+```
+admins
+  └── FIREBASE_AUTH_UID
+       └── enabled: true
 ```
 
-Find the UID in Firebase Console → Authentication → Users. Run this only from a trusted environment with permission to administer the Firebase project.
+Repeat for every person who should administer the portfolio. To revoke access, set `enabled` to `false` or delete that admin document.
 
-After assigning the claim, sign out of the portfolio admin page and sign in again so Firebase issues a token containing the new claim.
+## 3. Deploy Firestore rules
 
-### 2. Deploy Firestore rules
-
-From the project directory, deploy the updated rules:
+From the project directory, confirm that the Firebase CLI is targeting the correct Firebase project, then run:
 
 ```sh
 firebase deploy --only firestore:rules
 ```
 
-Review the Firebase project selected by the CLI before deploying. The rules intentionally keep portfolio content publicly readable while restricting writes to users whose verified ID token contains `admin: true`.
+The rules allow a signed-in user to read only their own admin record. They prevent all client-side creation, editing, or deletion of admin records. Portfolio writes require an enabled allowlist record.
 
-### 3. Review existing Firestore content
+## 4. Sign in
 
-The old starter data included another developer's identity, projects, contact details, and certificates. New empty databases now receive Montelent-safe defaults instead of those sample records.
+Open the portfolio Admin login page and sign in using the email and password created in Firebase Authentication. No custom claim or token setup is needed.
 
-This code change does not automatically rewrite an already-populated Firestore database. Back up your existing data, inspect the `projects`, `skills`, `experiences`, `certificates`, and `config/siteConfig` collections, and replace any starter/template content with your own. The admin dashboard's reset action now clears those four content collections before restoring the safe defaults, so use it only after confirming you want to discard their current contents.
+## Forking this project
+
+When forking this repository, use your own Firebase project:
+
+1. Create or select your Firebase project.
+2. Configure the app's Firebase environment variables for that project.
+3. Deploy the included Firestore rules.
+4. Create your own Firebase Authentication user(s).
+5. Add each authorised user's UID to your own Firestore `admins` collection with `enabled: true`.
+
+No original owner's UID, email, or secret is embedded in the source code.
 
 ## Security notes
 
-- Never expose Firebase Admin SDK credentials in frontend code.
-- Firebase web configuration values are client-side identifiers, not admin credentials; Firestore rules remain the authorization boundary.
+- Do not enable public account registration unless you intend to offer public accounts. Even if registration is enabled, newly registered users do not become admins unless you add their UID to the `admins` collection.
+- Admin records must be provisioned through the Firebase Console or another trusted administrative environment, never by the public frontend.
+- Never expose Firebase Admin SDK credentials in frontend code or `VITE_*` environment variables.
+- Firebase web configuration values are client-side identifiers; Firestore Security Rules are the authorization boundary.
 - Cloudinary upload presets must also enforce allowed formats, file-size limits, and unsigned-upload restrictions in the Cloudinary dashboard. Browser-side checks improve feedback but are not a security boundary.
