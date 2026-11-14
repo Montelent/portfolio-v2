@@ -61,7 +61,7 @@ const CertForm = ({
                         <ImageUpload
                             value={form.imageUrl}
                             onChange={(url) => setForm({ ...form, imageUrl: url })}
-                            uploadPreset="certificates"
+                            uploadPreset="projects"
                         />
                     </div>
                     <div className="space-y-2">
